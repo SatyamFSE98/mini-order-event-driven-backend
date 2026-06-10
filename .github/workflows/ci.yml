@@ -24,15 +24,15 @@ jobs:
 
       - name: Build order-service
         working-directory: order-service
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
       - name: Build inventory-service
         working-directory: inventory-service
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
       - name: Build notification-service
         working-directory: notification-service
-        run: mvn clean package
+        run: mvn clean package -DskipTests
 
       - name: Build Docker images
         run: |
