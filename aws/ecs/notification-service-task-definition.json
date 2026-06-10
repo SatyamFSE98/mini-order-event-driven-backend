@@ -1,0 +1,24 @@
+{
+  "family": "notification-service-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "notification-service",
+      "image": "<AWS_ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/mini-order/notification-service:latest",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8083, "protocol": "tcp" }],
+      "environment": [
+        { "name": "MYSQL_HOST", "value": "<RDS_ENDPOINT>" },
+        { "name": "MYSQL_PORT", "value": "3306" },
+        { "name": "MYSQL_DATABASE", "value": "notification_db" },
+        { "name": "MYSQL_USER", "value": "<DB_USER>" },
+        { "name": "MYSQL_PASSWORD", "value": "<DB_PASSWORD>" },
+        { "name": "KAFKA_BOOTSTRAP_SERVERS", "value": "<KAFKA_BOOTSTRAP_SERVER>" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+name: Deploy to AWS ECR and ECS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY_ORDER: mini-order/order-service
+  ECR_REPOSITORY_INVENTORY: mini-order/inventory-service
+  ECR_REPOSITORY_NOTIFICATION: mini-order/notification-service
+  ECS_CLUSTER: mini-order-cluster
+  ECS_SERVICE_ORDER: order-service
+  ECS_SERVICE_INVENTORY: inventory-service
+  ECS_SERVICE_NOTIFICATION: notification-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ORDER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_ORDER:latest ./order-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_INVENTORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_INVENTORY:latest ./inventory-service
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_NOTIFICATION:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_NOTIFICATION:latest ./notification-service
+
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_ORDER:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_ORDER:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_INVENTORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_INVENTORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_NOTIFICATION:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY_NOTIFICATION:latest
+
+      - name: Force ECS new deployment
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_ORDER --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_INVENTORY --force-new-deployment
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE_NOTIFICATION --force-new-deployment

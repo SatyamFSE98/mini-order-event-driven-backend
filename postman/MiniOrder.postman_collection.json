@@ -1,0 +1,81 @@
+{
+  "info": {
+    "name": "Mini Order Event Driven Microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Order Service - Create Order - Full Kafka Flow",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customerName\": \"Satyam\",\n  \"email\": \"satyam@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"productName\": \"Laptop\",\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/orders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "orders"]
+        }
+      }
+    },
+    {
+      "name": "Order Service - Get Order By Id",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8081/api/orders/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8081",
+          "path": ["api", "orders", "1"]
+        }
+      }
+    },
+    {
+      "name": "Inventory Service - Manual Reserve",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": 1,\n  \"customerName\": \"Satyam\",\n  \"email\": \"satyam@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"productName\": \"Laptop\",\n  \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8082/api/inventory/reserve",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8082",
+          "path": ["api", "inventory", "reserve"]
+        }
+      }
+    },
+    {
+      "name": "Notification Service - Manual Send",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": 1,\n  \"email\": \"satyam@gmail.com\",\n  \"phone\": \"9876543210\",\n  \"message\": \"Your order has been confirmed.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8083/api/notifications/send",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8083",
+          "path": ["api", "notifications", "send"]
+        }
+      }
+    }
+  ]
+}
